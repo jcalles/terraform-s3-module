@@ -201,16 +201,25 @@ resource "aws_s3_bucket_replication_configuration" "this" {
 
 ### adding lifecycle rules 
 resource "aws_s3_bucket_lifecycle_configuration" "this" {
-  for_each = {
-    for key, value in var.buckets :
-    key => value
-    if length(try(value.lifecycle_rules, [])) > 0
-  }
+  for_each = { for key, value in var.buckets : key => value }
   bucket                = lookup(each.value, "bucket_name", "${var.namespace}-${var.stage}-${var.aws_region}-${each.key}")
   expected_bucket_owner = var.aws_account_id
 
+  # Default rule to abort incomplete multipart uploads (required for security compliance)
+  rule {
+    id     = "abort-incomplete-multipart-uploads"
+    status = "Enabled"
+
+    abort_incomplete_multipart_upload {
+      days_after_initiation = try(each.value.abort_incomplete_multipart_upload_days, 7)
+    }
+
+    filter {}
+  }
+
+  # User-defined lifecycle rules (if any)
   dynamic "rule" {
-    for_each = each.value.lifecycle_rules
+    for_each = try(each.value.lifecycle_rules, [])
 
     content {
       id     = try(rule.value.id, null)

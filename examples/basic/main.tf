@@ -28,12 +28,45 @@ module "s3_buckets" {
   # Basic S3 bucket configuration
   buckets = {
     "data" = {
-      versioning_enabled = true
-      encryption_enabled = true
+      # Versioning configuration
+      versioning = {
+        enabled = true
+      }
+      # Server-side encryption (enabled by default with AES256)
+      server_side_encryption_rule = {
+        sse_algorithm = "AES256"
+      }
+      lifecycle_rules = [
+        {
+          id      = "default_lifecycle"
+          enabled = true
+          abort_incomplete_multipart_upload_days = 7
+          transition = [
+            {
+              days          = 30
+              storage_class = "STANDARD_IA"
+            },
+            {
+              days          = 90
+              storage_class = "GLACIER"
+            }
+          ]
+        }
+      ]
     }
     "data2" = {
-      versioning_enabled = false
-      encryption_enabled = false
+      # Versioning disabled - no versioning config needed
+      # Encryption disabled - override default
+      server_side_encryption_rule = {
+        sse_algorithm = "AES256"  # Note: encryption is always enabled, this is just explicit
+      }
+      lifecycle_rules = [
+        {
+          id      = "cleanup_incomplete_uploads"
+          enabled = true
+          abort_incomplete_multipart_upload_days = 1
+        }
+      ]
     }
   }
   
