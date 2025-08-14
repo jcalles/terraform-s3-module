@@ -40,10 +40,7 @@ checkov -d . --framework terraform
 # Expected result: ✅ 227 passed, ❌ 0 failed
 ```
 
-### Documentation
-- 📋 **[Complete Security Analysis](docs/security-analysis.md)** - Detailed security assessment and compliance mapping
-- 🚀 **[Security Quick Reference](docs/security-quick-reference.md)** - Common security patterns and configurations
-- 🔒 **[Security Best Practices](SECURITY.md)** - Guidelines for secure deployment and operation
+
 
 ## Quick Start
 
